@@ -39,13 +39,14 @@ public final class Swagger {
     static abstract class Method {
         public ArrayList<String> tags;
         public String operationId;
+        public ArrayList<Parameter> parameters;
         public ArrayList<String> consumes;
         public ArrayList<String> produces;
-        public ArrayList<Response> responses;
+        public LinkedHashMap<String, Response> responses;
     }
 
     public static class Post extends Method {
-        public ArrayList<Parameter> parameters;
+
     }
 
     public static class Get extends Method {

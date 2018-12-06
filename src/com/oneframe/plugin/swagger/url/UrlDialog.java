@@ -1,7 +1,5 @@
 package com.oneframe.plugin.swagger.url;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.psi.PsiClass;
@@ -63,11 +61,23 @@ public class UrlDialog extends DialogWrapper {
                 InputStream content = response.getEntity().getContent();
                 InputStreamReader input = new InputStreamReader(content);
                 BufferedReader reader = new BufferedReader(input);
-                String result = reader.readLine();
+
+                StringBuilder result = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    if (line.isEmpty()) {
+                        break;
+                    }
+
+                    result.append(line);
+                }
+
+                reader.close();
 
                 System.out.println(result);
 
-                Swagger swagger = new Gson().fromJson(result, Swagger.class);
+                Swagger swagger = new Gson().fromJson(result.toString(), Swagger.class);
             }
         } catch (IOException e) {
             e.printStackTrace();
