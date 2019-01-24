@@ -7,6 +7,6 @@ import javax.annotation.Nullable;
 
 public interface IAction {
 
-    @Nullable
-    PsiClass getPsiClass(AnActionEvent e);
+  @Nullable
+  PsiClass getPsiClass(AnActionEvent e);
 }

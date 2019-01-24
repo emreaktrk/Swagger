@@ -14,19 +14,18 @@ import javax.annotation.Nullable;
 
 public abstract class Action extends AnAction implements IAction {
 
-    @Nullable
-    @Override
-    public PsiClass getPsiClass(AnActionEvent e) {
-        PsiFile file = e.getData(LangDataKeys.PSI_FILE);
-        Editor editor = e.getData(PlatformDataKeys.EDITOR_EVEN_IF_INACTIVE);
-        if (file == null || editor == null) {
-            return null;
-        }
-
-        int offset = editor.getCaretModel().getOffset();
-        PsiElement element = file.findElementAt(offset);
-
-        return PsiTreeUtil.getParentOfType(element, PsiClass.class);
+  @Nullable
+  @Override
+  public PsiClass getPsiClass(AnActionEvent e) {
+    PsiFile file = e.getData(LangDataKeys.PSI_FILE);
+    Editor editor = e.getData(PlatformDataKeys.EDITOR_EVEN_IF_INACTIVE);
+    if (file == null || editor == null) {
+      return null;
     }
 
+    int offset = editor.getCaretModel().getOffset();
+    PsiElement element = file.findElementAt(offset);
+
+    return PsiTreeUtil.getParentOfType(element, PsiClass.class);
+  }
 }

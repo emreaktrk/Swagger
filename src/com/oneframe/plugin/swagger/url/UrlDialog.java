@@ -1,86 +1,62 @@
 package com.oneframe.plugin.swagger.url;
 
-import com.google.gson.Gson;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiClass;
-import com.oneframe.plugin.swagger.Swagger;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.jetbrains.annotations.Nullable;
+import com.intellij.util.ui.JBUI;
+import com.oneframe.plugin.swagger.utils.ValidationUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 public class UrlDialog extends DialogWrapper {
 
-    private JTextField mUrl = new JTextField(20);
+  private JTextField mUrl;
 
-    UrlDialog(PsiClass psi) {
-        super(psi.getProject());
+  UrlDialog(PsiClass psi) {
+    super(psi.getProject());
 
-        init();
-        setTitle("Write Swagger Url");
-    }
+    init();
+    setTitle("Write Swagger Url");
+  }
 
-    @Nullable
-    @Override
-    protected JComponent createCenterPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
+  @Override
+  protected JComponent createCenterPanel() {
+    JPanel panel = new JPanel(new GridBagLayout());
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.anchor = GridBagConstraints.WEST;
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.anchor = GridBagConstraints.NORTHWEST;
 
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        JLabel label = new JLabel("Enter your swagger url");
-        panel.add(label, constraints);
+    JLabel image = new JLabel();
+    image.setPreferredSize(JBUI.size(180, 100  ));
+    image.setIcon(IconLoader.getIcon("icons/starforce.png"));
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+    panel.add(image, constraints);
 
-        constraints.gridx = 0;
-        constraints.gridy = 1;
-        panel.add(mUrl, constraints);
+    JLabel header = new JLabel("Networking Swagger Generator");
+    header.setPreferredSize(JBUI.size(240, 60));
+    constraints.gridx = 1;
+    constraints.gridy = 0;
+    panel.add(header, constraints);
 
-        return panel;
-    }
+    JLabel label = new JLabel("Enter your swagger url");
+    constraints.gridx = 1;
+    constraints.gridy = 1;
+    panel.add(label, constraints);
 
-    @Override
-    protected void doOKAction() {
-        super.doOKAction();
+    mUrl = new JTextField(20);
+    constraints.gridx = 1;
+    constraints.gridy = 2;
+    panel.add(mUrl, constraints);
+    return panel;
+  }
 
-        try {
-            String url = mUrl.getText();
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpGet request = new HttpGet(url);
-            HttpResponse response = client.execute(request);
-            if (response.getStatusLine().getStatusCode() == 200) {
-                InputStream content = response.getEntity().getContent();
-                InputStreamReader input = new InputStreamReader(content);
-                BufferedReader reader = new BufferedReader(input);
+  @Override
+  protected void doOKAction() {
+    super.doOKAction();
 
-                StringBuilder result = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    if (line.isEmpty()) {
-                        break;
-                    }
-
-                    result.append(line);
-                }
-
-                reader.close();
-
-                System.out.println(result);
-
-                Swagger swagger = new Gson().fromJson(result.toString(), Swagger.class);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    String url = mUrl.getText();
+    if (ValidationUtils.url(url)) {}
+  }
 }
