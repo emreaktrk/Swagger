@@ -1,31 +1,41 @@
 package com.oneframe.plugin.swagger.utils;
 
+import org.apache.http.util.TextUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public final class ValidationUtils {
 
-  public static boolean email(@Nullable String email) {
-    if (email == null) {
+  public static boolean url(@Nullable String uri) {
+    if (uri == null) {
       return false;
     }
 
-    Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$.");
-    Matcher matcher = pattern.matcher(email);
-    return matcher.matches();
+    URL url;
+
+    try {
+      url = new URL(uri);
+    } catch (MalformedURLException e) {
+      return false;
+    }
+
+    try {
+      url.toURI();
+    } catch (URISyntaxException e) {
+      return false;
+    }
+
+    return true;
   }
 
-  public static boolean url(@Nullable String ur) {
-    if (ur == null) {
+  public static boolean has(@Nullable String text) {
+    if (text == null) {
       return false;
     }
 
-    Pattern pattern =
-        Pattern.compile(
-            "/((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%\\/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[\\w]*))?)/");
-    Matcher matcher = pattern.matcher(ur);
-    return matcher.matches();
+    return !TextUtils.isEmpty(text.trim());
   }
 }

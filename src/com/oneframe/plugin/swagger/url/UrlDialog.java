@@ -1,62 +1,88 @@
 package com.oneframe.plugin.swagger.url;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.psi.PsiClass;
 import com.intellij.util.ui.JBUI;
 import com.oneframe.plugin.swagger.utils.ValidationUtils;
+import com.oneframe.plugin.swagger.view.JImage;
+import com.oneframe.plugin.swagger.view.JInput;
+import com.oneframe.plugin.swagger.view.orientation.JHorizontalLayout;
+import com.oneframe.plugin.swagger.view.orientation.JVerticalLayout;
 
 import javax.swing.*;
-import java.awt.*;
+import java.io.IOException;
 
-public class UrlDialog extends DialogWrapper {
+public class UrlDialog extends DialogWrapper implements JInput.TextListener {
 
-  private JTextField mUrl;
+  private JInput mUrl;
+  private JInput mTarget;
+  private JInput mName;
 
   UrlDialog(PsiClass psi) {
     super(psi.getProject());
 
     init();
-    setTitle("Write Swagger Url");
+    setTitle("Networking Swagger Generator");
+    setOKActionEnabled(false);
   }
 
   @Override
   protected JComponent createCenterPanel() {
-    JPanel panel = new JPanel(new GridBagLayout());
+    mUrl = new JInput("Enter your swagger url");
+    mUrl.setListener(this);
 
-    GridBagConstraints constraints = new GridBagConstraints();
-    constraints.anchor = GridBagConstraints.NORTHWEST;
+    mTarget = new JInput("Enter your package");
+    mTarget.setListener(this);
 
-    JLabel image = new JLabel();
-    image.setPreferredSize(JBUI.size(180, 100  ));
-    image.setIcon(IconLoader.getIcon("icons/starforce.png"));
-    constraints.gridx = 0;
-    constraints.gridy = 0;
-    panel.add(image, constraints);
+    mName = new JInput("Enter your manager name");
+    mName.setListener(this);
 
-    JLabel header = new JLabel("Networking Swagger Generator");
-    header.setPreferredSize(JBUI.size(240, 60));
-    constraints.gridx = 1;
-    constraints.gridy = 0;
-    panel.add(header, constraints);
+    JPanel inputs = new JVerticalLayout.Builder().add(mUrl).add(mTarget).add(mName).build();
 
-    JLabel label = new JLabel("Enter your swagger url");
-    constraints.gridx = 1;
-    constraints.gridy = 1;
-    panel.add(label, constraints);
+    JImage image = new JImage("icons/starforce.png");
+    image.setPreferredSize(JBUI.size(180, 100));
 
-    mUrl = new JTextField(20);
-    constraints.gridx = 1;
-    constraints.gridy = 2;
-    panel.add(mUrl, constraints);
-    return panel;
+    return new JHorizontalLayout.Builder().add(image).add(inputs).build();
   }
 
   @Override
   protected void doOKAction() {
     super.doOKAction();
 
-    String url = mUrl.getText();
-    if (ValidationUtils.url(url)) {}
+    String command =
+        new StringBuilder()
+            .append("networking-swagger-java")
+            .append(" ")
+            .append(mUrl.field().getText())
+            .append(" ")
+            .append(mTarget.field().getText())
+            .append(" ")
+            .append(mName.field().getText())
+            .toString();
+    try {
+      Process process = new ProcessBuilder().command(command).start();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void onTextUpdate() {
+    if (!ValidationUtils.url(mUrl.field().getText())) {
+      setOKActionEnabled(false);
+      return;
+    }
+
+    if (!ValidationUtils.has(mTarget.field().getText())) {
+      setOKActionEnabled(false);
+      return;
+    }
+
+    if (!ValidationUtils.has(mName.field().getText())) {
+      setOKActionEnabled(false);
+      return;
+    }
+
+    setOKActionEnabled(true);
   }
 }
