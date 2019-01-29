@@ -1,4 +1,4 @@
-package com.oneframe.plugin.swagger.file;
+package com.oneframe.plugin.swagger.action.file;
 
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.psi.PsiClass;

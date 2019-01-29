@@ -1,18 +1,18 @@
-package com.oneframe.plugin.swagger.url;
+package com.oneframe.plugin.swagger.action.file;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.psi.PsiClass;
 import com.oneframe.plugin.swagger.Action;
 import org.jetbrains.annotations.NotNull;
 
-public class UrlAction extends Action {
+public class FileAction extends Action {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
     PsiClass psi = getPsiClass(e);
 
     if (psi != null) {
-      UrlDialog dialog = new UrlDialog(psi);
+      FileDialog dialog = new FileDialog(psi);
       dialog.show();
     }
   }

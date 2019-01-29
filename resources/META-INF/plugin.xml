@@ -1,8 +1,8 @@
 <idea-plugin>
     <id>com.oneframe.swaggerimport</id>
-    <name>Swagger Import</name>
+    <name>Networking Swagger Code Generator</name>
     <version>1.0</version>
-    <vendor email="support@kocsistem.com" url="http://www.kocsistem.com">KocSistem</vendor>
+    <vendor email="starforce@kocsistem.com.tr" url="http://www.kocsistem.com">KocSistem</vendor>
 
     <description><![CDATA[
       Enter short description for your plugin here.<br>
@@ -29,13 +29,8 @@
     </extensions>
 
     <actions>
-        <action id="importFileAction" class="com.oneframe.plugin.swagger.file.FileAction"
-                text="Import networking from file"
-                description="Imports Swagger file to generate neccessary classes">
-            <add-to-group group-id="GenerateGroup" anchor="last"/>
-        </action>
-        <action id="importUrlAction" class="com.oneframe.plugin.swagger.url.UrlAction"
-                text="Import network from url"
+        <action id="importUrlAction" class="com.oneframe.plugin.swagger.action.url.UrlAction"
+                text="Generate Networking via Swagger"
                 description="Imports Swagger url to generate neccessary classes">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>

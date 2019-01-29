@@ -1,16 +1,23 @@
-package com.oneframe.plugin.swagger.url;
+package com.oneframe.plugin.swagger.action.url;
 
+import com.intellij.ide.projectView.ProjectView;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.psi.PsiClass;
 import com.intellij.util.ui.JBUI;
+import com.oneframe.plugin.swagger.action.GenerateCommand;
 import com.oneframe.plugin.swagger.utils.ValidationUtils;
 import com.oneframe.plugin.swagger.view.JImage;
 import com.oneframe.plugin.swagger.view.JInput;
 import com.oneframe.plugin.swagger.view.orientation.JHorizontalLayout;
 import com.oneframe.plugin.swagger.view.orientation.JVerticalLayout;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.io.IOException;
 
 public class UrlDialog extends DialogWrapper implements JInput.TextListener {
 
@@ -46,27 +53,6 @@ public class UrlDialog extends DialogWrapper implements JInput.TextListener {
   }
 
   @Override
-  protected void doOKAction() {
-    super.doOKAction();
-
-    String command =
-        new StringBuilder()
-            .append("networking-swagger-java")
-            .append(" ")
-            .append(mUrl.field().getText())
-            .append(" ")
-            .append(mTarget.field().getText())
-            .append(" ")
-            .append(mName.field().getText())
-            .toString();
-    try {
-      Process process = new ProcessBuilder().command(command).start();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Override
   public void onTextUpdate() {
     if (!ValidationUtils.url(mUrl.field().getText())) {
       setOKActionEnabled(false);
@@ -84,5 +70,27 @@ public class UrlDialog extends DialogWrapper implements JInput.TextListener {
     }
 
     setOKActionEnabled(true);
+  }
+
+  @Override
+  protected void doOKAction() {
+    super.doOKAction();
+
+    Project project = ProjectManager.getInstance().getOpenProjects()[0];
+
+    ProgressManager.getInstance()
+        .run(
+            new Task.Backgroundable(project, "Generating apis...", false) {
+              @Override
+              public void run(@NotNull ProgressIndicator progressIndicator) {
+                String url = mUrl.field().getText();
+                String target = mTarget.field().getText();
+                String name = mName.field().getText();
+                GenerateCommand generate = new GenerateCommand(url, target, name);
+                generate.execute();
+              }
+            });
+
+    ProjectView.getInstance(project).refresh();
   }
 }
