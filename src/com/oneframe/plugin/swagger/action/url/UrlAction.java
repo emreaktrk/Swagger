@@ -50,13 +50,29 @@ public class UrlAction extends Action implements UrlDialog.OnOKClickListener {
                 generate.setInputs(url, target, name);
                 generate.execute();
 
+                project.getBaseDir().refresh(false, true);
+              }
+
+              @Override
+              public void onSuccess() {
+                super.onSuccess();
+
                 new Notification("url", null, NotificationType.INFORMATION)
                     .setImportant(true)
                     .setTitle("Success")
                     .setContent("APIs and Unit Tests are generated")
                     .notify(project);
+              }
 
-                project.getBaseDir().refresh(false, true);
+              @Override
+              public void onCancel() {
+                super.onCancel();
+
+                new Notification("url", null, NotificationType.ERROR)
+                    .setImportant(true)
+                    .setTitle("Cancelled")
+                    .setContent("Operation is stopped")
+                    .notify(project);
               }
             });
   }
