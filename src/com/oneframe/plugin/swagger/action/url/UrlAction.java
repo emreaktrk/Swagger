@@ -49,18 +49,11 @@ public class UrlAction extends Action implements UrlDialog.OnOKClickListener {
                 GenerateCommand generate = new GenerateCommand(project, mConsole);
                 generate.setInputs(url, target, name);
                 generate.execute();
-                boolean success = generate.isSuccess();
 
-                new Notification(
-                        "url",
-                        null,
-                        success ? NotificationType.INFORMATION : NotificationType.ERROR)
+                new Notification("url", null, NotificationType.INFORMATION)
                     .setImportant(true)
-                    .setTitle(success ? "Success" : "Error")
-                    .setContent(
-                        success
-                            ? "APIs and Unit Tests are generated"
-                            : "There is an execution problem")
+                    .setTitle("Success")
+                    .setContent("APIs and Unit Tests are generated")
                     .notify(project);
 
                 project.getBaseDir().refresh(false, true);
