@@ -4,7 +4,7 @@ public interface ICommand {
 
   String command();
 
-  boolean execute();
+  void execute();
 
-  void executeAsync();
+  boolean isSuccess();
 }

@@ -2,57 +2,25 @@ package com.oneframe.plugin.swagger.command;
 
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.OSProcessHandler;
-import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.util.Key;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Command implements ICommand {
 
   private boolean isExecuting;
   private StringBuilder mOutput;
+  private boolean mResult;
+  private Project mProject;
+  private ConsoleView mConsoleView;
 
-  @Override
-  public boolean execute() {
-    if (isExecuting) {
-      return false;
-    }
-
-    isExecuting = true;
-
-    boolean result = true;
-    mOutput = new StringBuilder();
-
-    try {
-      String[] exec = command().split(" ");
-      GeneralCommandLine commandline = new GeneralCommandLine(exec);
-
-      Project project = ProjectManager.getInstance().getOpenProjects()[0];
-      commandline.setWorkDirectory(project.getBasePath());
-
-      ProcessHandler handler = new OSProcessHandler(commandline);
-      handler.startNotify();
-      handler.waitFor();
-
-      Integer code = handler.getExitCode();
-      if (code != null) {
-        result = code == 0;
-      }
-    } catch (Exception e) {
-      result = false;
-    } finally {
-      // TODO Close streams
-    }
-
-    return result;
+  public Command(Project project, ConsoleView consoleView) {
+    mProject = project;
+    mConsoleView = consoleView;
   }
 
   @Override
-  public void executeAsync() {
+  public void execute() {
     if (isExecuting) {
       return;
     }
@@ -63,42 +31,35 @@ public abstract class Command implements ICommand {
 
     try {
       String[] exec = command().split(" ");
+
       GeneralCommandLine commandline = new GeneralCommandLine(exec);
+      commandline.setWorkDirectory(mProject.getBasePath());
 
-      Project project = ProjectManager.getInstance().getOpenProjects()[0];
-      commandline.setWorkDirectory(project.getBasePath());
-
-      ProcessHandler handler = new OSProcessHandler(commandline);
+      OSProcessHandler handler = new OSProcessHandler(commandline);
       handler.startNotify();
-      handler.addProcessListener(new ProcessListener() {
-        @Override
-        public void startNotified(@NotNull ProcessEvent processEvent) {
+      handler.waitFor();
 
-        }
-
-        @Override
-        public void processTerminated(@NotNull ProcessEvent processEvent) {
-
-        }
-
-        @Override
-        public void processWillTerminate(@NotNull ProcessEvent processEvent, boolean b) {
-
-        }
-
-        @Override
-        public void onTextAvailable(@NotNull ProcessEvent processEvent, @NotNull Key key) {
-
-        }
-      });
-
+      Integer code = handler.getExitCode();
+      if (code != null) {
+        mResult = code == 0;
+      }
     } catch (Exception e) {
+      e.printStackTrace();
     } finally {
-      // TODO Close streams
+      isExecuting = false;
     }
   }
 
   public @Nullable String getOutput() {
     return mOutput.toString();
+  }
+
+  @Override
+  public boolean isSuccess() {
+    if (!isExecuting) {
+      return false;
+    }
+
+    return mResult;
   }
 }

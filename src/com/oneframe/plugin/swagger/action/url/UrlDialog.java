@@ -1,21 +1,14 @@
 package com.oneframe.plugin.swagger.action.url;
 
-import com.intellij.ide.projectView.ProjectView;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.psi.PsiClass;
 import com.intellij.util.ui.JBUI;
-import com.oneframe.plugin.swagger.action.GenerateCommand;
 import com.oneframe.plugin.swagger.utils.ValidationUtils;
 import com.oneframe.plugin.swagger.view.JImage;
 import com.oneframe.plugin.swagger.view.JInput;
 import com.oneframe.plugin.swagger.view.orientation.JHorizontalLayout;
 import com.oneframe.plugin.swagger.view.orientation.JVerticalLayout;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
@@ -24,13 +17,20 @@ public class UrlDialog extends DialogWrapper implements JInput.TextListener {
   private JInput mUrl;
   private JInput mTarget;
   private JInput mName;
+  private PsiClass mPsi;
 
-  UrlDialog(PsiClass psi) {
+  private OnOKClickListener mListener;
+
+  UrlDialog(PsiClass psi, @Nullable OnOKClickListener listener) {
     super(psi.getProject());
+
+    mPsi = psi;
 
     init();
     setTitle("Networking Swagger Generator");
     setOKActionEnabled(false);
+
+    mListener = listener;
   }
 
   @Override
@@ -76,21 +76,16 @@ public class UrlDialog extends DialogWrapper implements JInput.TextListener {
   protected void doOKAction() {
     super.doOKAction();
 
-    Project project = ProjectManager.getInstance().getOpenProjects()[0];
+    if (mListener != null) {
+      String url = mUrl.field().getText();
+      String target = mTarget.field().getText();
+      String name = mName.field().getText();
 
-    ProgressManager.getInstance()
-        .run(
-            new Task.Backgroundable(project, "Generating apis...", false) {
-              @Override
-              public void run(@NotNull ProgressIndicator progressIndicator) {
-                String url = mUrl.field().getText();
-                String target = mTarget.field().getText();
-                String name = mName.field().getText();
-                GenerateCommand generate = new GenerateCommand(url, target, name);
-                generate.execute();
-              }
-            });
+      mListener.onOKClick(mPsi, url, target, name);
+    }
+  }
 
-    ProjectView.getInstance(project).refresh();
+  public interface OnOKClickListener {
+    void onOKClick(PsiClass psi, String url, String target, String name);
   }
 }
